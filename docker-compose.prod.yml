@@ -1,0 +1,38 @@
+version: '3.8'
+
+# Production Compose File
+# Excludes Postgres and Redis, assuming AWS RDS and ElastiCache are used.
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: smartllm-api-prod
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    networks:
+      - smartllm_prod_network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: smartllm-web-prod
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "3000:3000"
+    depends_on:
+      backend:
+        condition: service_started
+    networks:
+      - smartllm_prod_network
+
+networks:
+  smartllm_prod_network:
+    driver: bridge

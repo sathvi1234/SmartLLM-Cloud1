@@ -1,0 +1,55 @@
+{
+  "title": "SmartLLM Operations Dashboard",
+  "tags": ["smartllm", "production", "fastapi"],
+  "timezone": "browser",
+  "refresh": "5s",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "HTTP Request Rate",
+      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+      "targets": [
+        {
+          "expr": "sum(rate(http_requests_total[1m])) by (method, handler)",
+          "legendFormat": "{{method}} {{handler}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Error Rate (Alerting - 5xx)",
+      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+      "targets": [
+        {
+          "expr": "sum(rate(http_requests_total{status=~\"5..\"}[1m]))",
+          "legendFormat": "5xx Errors"
+        }
+      ],
+      "alert": {
+        "name": "High 5xx Error Rate",
+        "conditions": [
+          {
+            "evaluator": {"params": [5], "type": "gt"},
+            "operator": {"type": "and"},
+            "query": {"params": ["A", "5m", "now"]},
+            "reducer": {"type": "avg"}
+          }
+        ]
+      }
+    },
+    {
+      "type": "heatmap",
+      "title": "API Latency Distribution",
+      "gridPos": {"h": 8, "w": 24, "x": 0, "y": 8},
+      "targets": [
+        {
+          "expr": "sum(rate(http_request_duration_seconds_bucket[5m])) by (le)",
+          "format": "heatmap"
+        }
+      ],
+      "color": {
+        "mode": "opacity"
+      }
+    }
+  ]
+}
