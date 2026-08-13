@@ -26,10 +26,12 @@ COPY . .
 RUN useradd -m appuser && chown -R appuser:appuser /app
 USER appuser
 
+# Render (and other hosts) inject PORT; default 8000 for local/docker-compose.
 EXPOSE 8000
 
-# Healthcheck targeting the /health endpoint
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:8000/api/v1/health || exit 1
+# Use the root /health endpoint (no auth, no DB). Expand PORT at container runtime.
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD sh -c 'curl -f http://127.0.0.1:${PORT:-8000}/health || exit 1'
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Listen on 0.0.0.0 and Render's PORT (fallback 8000).
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]
