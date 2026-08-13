@@ -26,9 +26,12 @@ app = FastAPI(
     version="1.0.0",
 )
 
+# Explicit localhost + configured frontend origins; Vercel hosts via regex.
+# Avoid allow_origins=["*"] with credentials (invalid in browsers).
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.cors_origins_list,
+    allow_origin_regex=settings.CORS_ORIGIN_REGEX or None,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

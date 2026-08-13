@@ -38,6 +38,17 @@ class Settings(BaseSettings):
     RESET_TOKEN_EXPIRE_MINUTES: int = 60 # Password reset token
     VERIFY_TOKEN_EXPIRE_MINUTES: int = 60 * 24 # Email verification token
     DATABASE_URL: str = "postgresql://postgres:supersecretpassword@localhost:5432/smartllm"
+
+    # Comma-separated browser origins allowed to call this API (Vercel + local).
+    # Example: https://your-app.vercel.app,http://localhost:3000
+    CORS_ORIGINS: str = (
+        "http://localhost:3000,"
+        "http://localhost:3001,"
+        "http://127.0.0.1:3000,"
+        "http://127.0.0.1:3001"
+    )
+    # Optional regex for preview/prod Vercel hosts (no secrets).
+    CORS_ORIGIN_REGEX: str = r"https://.*\.vercel\.app"
     
     # AI Providers (Groq != xAI/Grok; separate keys and provider ids)
     OPENAI_API_KEY: str | None = None
@@ -46,5 +57,9 @@ class Settings(BaseSettings):
     XAI_API_KEY: str | None = None
     OLLAMA_BASE_URL: str = "http://localhost:11434"
     XAI_BASE_URL: str = "https://api.x.ai/v1"
+
+    @property
+    def cors_origins_list(self) -> list[str]:
+        return [o.strip() for o in self.CORS_ORIGINS.split(",") if o.strip()]
 
 settings = Settings()

@@ -1,7 +1,20 @@
 /** Central API client for the SmartLLM Cloud backend. */
 
-export const API_BASE =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
+/**
+ * Normalize the public API base URL.
+ * Accepts either:
+ *   https://smartllm-cloud1-1.onrender.com
+ *   https://smartllm-cloud1-1.onrender.com/api/v1
+ * Local default keeps /api/v1 for development.
+ */
+function resolveApiBase(): string {
+  const raw = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1").trim();
+  const trimmed = raw.replace(/\/+$/, "");
+  if (trimmed.endsWith("/api/v1")) return trimmed;
+  return `${trimmed}/api/v1`;
+}
+
+export const API_BASE = resolveApiBase();
 
 export class ApiError extends Error {
   status: number;
